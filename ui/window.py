@@ -18,7 +18,7 @@ import tkinter as tk
 from tkinter import END, LEFT, ttk
 from tkinter.scrolledtext import ScrolledText
 
-from chat.create_chat import get_response, init_log, EXTRA_LOG_FILE_NAME
+from chat.create_chat import get_response, get_response_with_decoration, init_log, EXTRA_LOG_FILE_NAME
 
 
 class ChatGUI:
@@ -70,7 +70,7 @@ class ChatGUI:
     def get_text(self):
         content = self.text_input.get(1.0, END)
         print("Input:\n", content)
-        response = get_response(content)
+        response = get_response_with_decoration(content, 'feedback')
         print("ChatGPT:", response)
         self.add_to_chatlog(f"ChatGPT:{response}")
 

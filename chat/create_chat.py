@@ -2,8 +2,10 @@ import json
 import logging
 import os
 import sys
+from enum import Enum, auto
 
 import openai
+from .config import REPLACE_MARKER, CREATE_DECORATION, FEEDBACK_DECORATION
 
 # OpenAI APIキーの設定
 openai.api_key = os.environ.get("OPEN_AI_API_KEY")
@@ -23,6 +25,11 @@ EXTRA_LOG_FILE_NAME = "example.log"
 # json_logger.setLevel(logging.INFO)
 # json_logger.addHandler(json_handler)
 
+
+class Command(Enum):
+    RAW = auto()
+    CREATE = auto()
+    FEEDBACK = auto()
 
 class JsonFormatter(logging.Formatter):
     def format(self, record):
@@ -145,6 +152,17 @@ def get_response(input_message):
     log_chat(input_message, response)
     return response
 
+def get_response_with_decoration(input_message, command):
+    if command.upper() == Command.CREATE.name:
+        decorated = CREATE_DECORATION.replace(REPLACE_MARKER, input_message) 
+    elif command.upper() == Command.FEEDBACK.name:
+        decorated = FEEDBACK_DECORATION.replace(REPLACE_MARKER, input_message) 
+    else:
+        raise Exception(f'The command {command} is not supported.')
+
+    print('decorated:', decorated)
+    return get_response(decorated)
+
 def init_log(log_file_name):
 
     if len(basic_logger.handlers):
@@ -163,6 +181,11 @@ if __name__ == "__main__":
     # user_input = input("ユーザー: ")
     print(f"sys.argc: {len(sys.argv)}")
     print(f"sys.argv[1]: {sys.argv[1]}")
-    user_input = sys.argv[1]
-    response = get_response(user_input)
+    print(f"sys.argv[2]: {sys.argv[2]}")
+    command = sys.argv[1]
+    user_input = sys.argv[2]
+    if command.upper() == Command.RAW.name:
+        response = get_response(user_input)
+    else:
+        response = get_response_with_decoration(user_input, command)
     print("ChatGPT:", response)
